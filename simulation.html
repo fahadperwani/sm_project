@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Joe Coledge Game Simulation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        padding: 20px;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      label {
+        display: block;
+        margin: 10px 0 5px;
+      }
+
+      input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
+      .error {
+        color: red;
+        font-size: 14px;
+        margin-top: -15px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Joe Coledge Game Simulation</h1>
+
+      <label for="probability"
+        >Enter Probability Joe Enters Game (Default: 0.40):</label
+      >
+      <input
+        type="number"
+        id="probability"
+        min="0"
+        max="1"
+        step="0.01"
+        value="0.40"
+      />
+
+      <label for="firstGame">Game number Joe first enters (Default: 4):</label>
+      <input type="number" id="firstGame" min="1" step="1" value="4" />
+
+      <label for="totalGames"
+        >Total number of games to consider for part (b) (Default: 5):</label
+      >
+      <input type="number" id="totalGames" min="1" step="1" value="5" />
+
+      <button onclick="simulate()">Simulate</button>
+
+      <div class="result" id="result"></div>
+      <div class="error" id="error"></div>
+    </div>
+
+    <script>
+      function simulate() {
+        const probabilityInput = document.getElementById("probability");
+        const firstGameInput = document.getElementById("firstGame");
+        const totalGamesInput = document.getElementById("totalGames");
+
+        const probability = parseFloat(probabilityInput.value);
+        const firstGame = parseInt(firstGameInput.value);
+        const totalGames = parseInt(totalGamesInput.value);
+
+        const resultDiv = document.getElementById("result");
+        const errorDiv = document.getElementById("error");
+
+        // Clear previous results and errors
+        resultDiv.innerHTML = "";
+        errorDiv.innerHTML = "";
+
+        // Input validation
+        if (isNaN(probability) || probability < 0 || probability > 1) {
+          errorDiv.textContent =
+            "Please enter a valid probability between 0 and 1.";
+          return;
+        }
+        if (isNaN(firstGame) || firstGame < 1) {
+          errorDiv.textContent =
+            "Please enter a valid game number (1 or greater) for the first game Joe enters.";
+          return;
+        }
+        if (isNaN(totalGames) || totalGames < 1) {
+          errorDiv.textContent =
+            "Please enter a valid number of total games (1 or greater) for part (b).";
+          return;
+        }
+
+        // Part (a) Calculation: Probability that Joe enters the game in the 'firstGame' number
+        const firstGameProbability =
+          Math.pow(1 - probability, firstGame - 1) * probability;
+
+        // Part (b) Calculation: Probability that Joe plays in no more than 2 of the totalGames
+        const binomial = (n, k) => {
+          let coeff = 1;
+          for (let x = n - k + 1; x <= n; x++) coeff *= x;
+          for (let x = 1; x <= k; x++) coeff /= x;
+          return coeff;
+        };
+
+        const binomialProbability = (n, k, p) =>
+          binomial(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+
+        let probabilityNoMoreThanTwo = 0;
+        for (let i = 0; i <= 2; i++) {
+          probabilityNoMoreThanTwo += binomialProbability(
+            totalGames,
+            i,
+            probability
+          );
+        }
+
+        // Display the results
+        resultDiv.innerHTML = `
+      <h3>Results</h3>
+      <p><strong>Part (a):</strong> Probability that Joe's first game is the ${firstGame}th game: ${(
+          firstGameProbability * 100
+        ).toFixed(2)}%</p>
+      <p><strong>Part (b):</strong> Probability that Joe plays in no more than 2 of the first ${totalGames} games: ${(
+          probabilityNoMoreThanTwo * 100
+        ).toFixed(2)}%</p>
+    `;
+      }
+    </script>
+  </body>
+</html>
